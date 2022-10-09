@@ -8,6 +8,7 @@ import java.util.Scanner;
  * Code by Alex Mariano
  * Numerical Methods and Computing (CS3010)
  * Professor Dr. Lajpat Rai Raheja
+ * California State Polytechnic University, Pomona
  * Programming Project 1
  */
 
