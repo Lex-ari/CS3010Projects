@@ -13,16 +13,15 @@ public class GaussianEliminationWithScaledPartialPivoting {
 
     private static double[][] augmentedCoefficientMatrix;
     private static Scanner userInput = new Scanner(System.in);
-    private ArrayList<Integer> indexVectors = new ArrayList();
     private static int[] scaleVectors;
     public static void main(String[] args){
         while (true){
             System.out.println("Enter \"File\" to input filename, enter \"Manual\" to input coefficients manually.");
             String initialString = userInput.nextLine();
-            if (initialString.toLowerCase().equals("file")){
+            if (initialString.equalsIgnoreCase("file")){
                 augmentedCoefficientMatrix = getACMFromFile();
                 break;
-            } else if (initialString.toLowerCase().equals("manual")){
+            } else if (initialString.equalsIgnoreCase("manual")){
                 augmentedCoefficientMatrix = getACMFromUser();
                 break;
             } else {
