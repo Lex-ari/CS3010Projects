@@ -30,22 +30,35 @@ public class GaussianEliminationWithScaledPartialPivoting {
             }
         }
         System.out.println("Solving: ");
-        printAugmentedCoefficientMatrix();
+
+        double[] solutions = gaussianSolver();
+        System.out.println();
+        for (int i = 0; i < solutions.length; i++){
+            System.out.println("x" + i + "=" + solutions[i]);
+        }
+    }
+
+    /***
+     * Prints out current augmented coefficient matrix
+     */
+    private static void printAugmentedCoefficientMatrix(){
+        for (double[] row: augmentedCoefficientMatrix){
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
+    /***
+     * Setup to run gaussianSolver with standard parameters
+     * @return solutions using Gaussian elimination with Scaled Partial Pivoting
+     */
+    private static double[] gaussianSolver(){
         scaleVectors = getMaxOfAugmentedCoefficientMatrix(); // Setting scale vectors, the max coefficient of each equation
         ArrayList<Integer> initialIndexVectors = new ArrayList<Integer>();
         for (int i = 0; i < augmentedCoefficientMatrix.length; i++){
             initialIndexVectors.add(i);
         }
-        System.out.println(Arrays.toString(gaussianSolver(0, initialIndexVectors)));
+        return gaussianSolver(0, initialIndexVectors);
     }
-
-    private static void printAugmentedCoefficientMatrix(){
-        for (double[] row: augmentedCoefficientMatrix){
-            System.out.println(Arrays.toString(row));
-        }
-        System.out.println();
-    }
-
 
     /***
      * Recursively solves for all values of equations. Modifies augmentedCoefficientMatrix.
@@ -54,16 +67,22 @@ public class GaussianEliminationWithScaledPartialPivoting {
      * @return double array containing the solved values of x1, x2, etc...
      */
     private static double[] gaussianSolver(int step, ArrayList<Integer> indexVectors){
-        printAugmentedCoefficientMatrix(); //PROJECT REQUIREMENTS
-        System.out.println(indexVectors); // PROJECT REQUIREMENTS
-        int workingIndex = getLargestIndexFromIndexVectors(step, indexVectors);
-        for (int indexVector : indexVectors){
-            double multiplier = augmentedCoefficientMatrix[indexVector][step] / augmentedCoefficientMatrix[workingIndex][step];
-            for (int i = step; i < augmentedCoefficientMatrix[0].length; i++){
-                if (indexVector != workingIndex){
-                    augmentedCoefficientMatrix[indexVector][i] -= augmentedCoefficientMatrix[workingIndex][i] * multiplier;
+        System.out.println("Step: " + step);
+        printAugmentedCoefficientMatrix(); //PROJECT REQUIREMENTS - Show intermediate matrix
+        int workingIndex = indexVectors.get(0); // Default if only one equation has not been iterated through.
+        if (indexVectors.size() != 1){
+            System.out.println("Index Vectors (Equations left to check):" + indexVectors);
+            workingIndex = getLargestIndexFromIndexVectors(step, indexVectors);
+            for (int indexVector : indexVectors){
+                double multiplier = augmentedCoefficientMatrix[indexVector][step] / augmentedCoefficientMatrix[workingIndex][step];
+                for (int i = step; i < augmentedCoefficientMatrix[0].length; i++){
+                    if (indexVector != workingIndex){
+                        augmentedCoefficientMatrix[indexVector][i] -= augmentedCoefficientMatrix[workingIndex][i] * multiplier;
+                    }
                 }
             }
+        } else {
+            System.out.println("Gaussian elimination completed --> Back Substitution to solve for x values");
         }
 
         double[] returnValues;
@@ -71,11 +90,25 @@ public class GaussianEliminationWithScaledPartialPivoting {
             returnValues = new double[augmentedCoefficientMatrix.length];
         } else {
             indexVectors.remove(Integer.valueOf(workingIndex));
-
+            System.out.println();
             returnValues = gaussianSolver(step + 1, indexVectors);
         }
-        returnValues[step] = backSub(step, workingIndex, returnValues);
+        returnValues[step] = roundIfInteger(backSub(step, workingIndex, returnValues));
         return returnValues;
+    }
+
+    /***
+     * Rounds a double value if it is extremely close to an integer. Ex. 0.9999999999 --> 1.0
+     * @param value to be check if it is an integer
+     * @return rounded value, or value if it is not an integer.
+     */
+    private static double roundIfInteger(double value){
+        double floorSub = Math.abs(value - Math.floor(value));
+        double ceilingSub = Math.abs(value - Math.ceil(value));
+        if (floorSub < 1E-9 || ceilingSub < 1E-9){
+            return Math.round(value);
+        }
+        return value;
     }
 
     /***
@@ -105,13 +138,17 @@ public class GaussianEliminationWithScaledPartialPivoting {
     private static int getLargestIndexFromIndexVectors(int step, ArrayList<Integer> indexVectors){
         double max = 0f;
         int returnIndex = -1;
+        ArrayList<Double> scaledRatios = new ArrayList<Double>();
         for (int indexVector : indexVectors){
             double testingValue = Math.abs(augmentedCoefficientMatrix[indexVector][step]) / scaleVectors[indexVector];
+            scaledRatios.add(testingValue);
             if (testingValue > max){
                 max = testingValue;
                 returnIndex = indexVector;
             }
         }
+        System.out.println("Scaled Ratios: " + scaledRatios); //PROJECT REQUIREMENTS - Output scaled ratios at each step
+        System.out.println("Equation to pivot by: " + returnIndex); //PROJECT REQUIREMENTS - Mention selected pivot row
         return returnIndex; // STUB
     }
 
