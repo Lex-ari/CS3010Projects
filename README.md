@@ -10,4 +10,4 @@ California State Polytechnic University, Pomona
 
 
 # Programming Projects:
-Programming Project 1 - GaussianEliminationWithScaledPartialPivoting.java
+Programming Project 1 - GaussianEliminationWithScaledPartialPivoting.java https://github.com/Lex-ari/CS3010Projects/blob/main/src/GaussianEliminationWithScaledPartialPivoting.java
