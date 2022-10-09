@@ -30,13 +30,22 @@ public class GaussianEliminationWithScaledPartialPivoting {
             }
         }
         System.out.println("Solving: ");
+        printAugmentedCoefficientMatrix();
+        scaleVectors = getMaxOfAugmentedCoefficientMatrix(); // Setting scale vectors, the max coefficient of each equation
+        ArrayList<Integer> initialIndexVectors = new ArrayList<Integer>();
+        for (int i = 0; i < augmentedCoefficientMatrix.length; i++){
+            initialIndexVectors.add(i);
+        }
+        System.out.println(Arrays.toString(gaussianSolver(0, initialIndexVectors)));
+    }
+
+    private static void printAugmentedCoefficientMatrix(){
         for (double[] row: augmentedCoefficientMatrix){
             System.out.println(Arrays.toString(row));
         }
-        scaleVectors = getMaxOfAugmentedCoefficientMatrix(); // Setting scale vectors, the max coefficient of each equation
-        ArrayList<Integer> initialIndexVectors = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3));
-        gaussianSolver(0, initialIndexVectors);
+        System.out.println();
     }
+
 
     /***
      * Recursively solves for all values of equations. Modifies augmentedCoefficientMatrix.
@@ -45,6 +54,8 @@ public class GaussianEliminationWithScaledPartialPivoting {
      * @return double array containing the solved values of x1, x2, etc...
      */
     private static double[] gaussianSolver(int step, ArrayList<Integer> indexVectors){
+        printAugmentedCoefficientMatrix(); //PROJECT REQUIREMENTS
+        System.out.println(indexVectors); // PROJECT REQUIREMENTS
         int workingIndex = getLargestIndexFromIndexVectors(step, indexVectors);
         for (int indexVector : indexVectors){
             double multiplier = augmentedCoefficientMatrix[indexVector][step] / augmentedCoefficientMatrix[workingIndex][step];
@@ -55,7 +66,34 @@ public class GaussianEliminationWithScaledPartialPivoting {
             }
         }
 
-        return new double[0]; // STUB
+        double[] returnValues;
+        if (step == augmentedCoefficientMatrix.length - 1){ //base case
+            returnValues = new double[augmentedCoefficientMatrix.length];
+        } else {
+            indexVectors.remove(Integer.valueOf(workingIndex));
+
+            returnValues = gaussianSolver(step + 1, indexVectors);
+        }
+        returnValues[step] = backSub(step, workingIndex, returnValues);
+        return returnValues;
+    }
+
+    /***
+     * Back substitution by multiplying each coefficient by it's x values.
+     * NOTE: It is assumed that the current working index and xValues will differ by 1.
+     * For example, solving 13/3x1 -83/6x2 = -45/2, x2 is known, but x1 is not (and is default set 0 in xValues).
+     * This ultimately gives the sum of known values
+     * @param step the coefficient to solve for
+     * @param workingIndex the index of the current equation used to solve for the wanted coefficient
+     * @param xValues double[] of known xValues
+     * @return double of x of the current equation
+     */
+    private static double backSub(int step, int workingIndex, double[] xValues){
+        double returnAnswer = augmentedCoefficientMatrix[workingIndex][augmentedCoefficientMatrix.length];
+        for (int i = step + 1; i < augmentedCoefficientMatrix.length; i++){
+            returnAnswer -= augmentedCoefficientMatrix[workingIndex][i] * xValues[i];
+        }
+        return returnAnswer / augmentedCoefficientMatrix[workingIndex][step];
     }
 
     /***
