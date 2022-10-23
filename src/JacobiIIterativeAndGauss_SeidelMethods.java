@@ -306,9 +306,9 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
      */
     private static boolean isDiagonallyDominant(int[][] matrix){
         for (int row = 0; row < matrix.length; row++){
-            int diagonalInteger = matrix[row][row];
+            int diagonalInteger = Math.abs(matrix[row][row]);
             for (int col = 0; col < matrix[row].length - 2; col++){
-                if (row != col && matrix[row][col] >= diagonalInteger){
+                if (row != col && Math.abs(matrix[row][col]) >= diagonalInteger){
                     return false;
                 }
             }
