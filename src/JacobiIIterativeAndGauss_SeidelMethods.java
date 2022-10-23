@@ -70,6 +70,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         } while (i < 50 && calculateError(nSolutions, nMinus1Solutions) > stoppingError);
     }
 
+    /**
+     * Copies each value of a double[] array to a new double[] array
+     * @param array double[] to copy from
+     * @return double[] to copy to.
+     */
     private static double[] copyArray(double[] array){
         double[] returnArray = new double[array.length];
         for (int i = 0; i < array.length; i++){
@@ -78,6 +83,12 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return returnArray;
     }
 
+    /**
+     * Calculates error by ||Xn - Xn-1|| / ||Xn||
+     * @param nSolutions double[] of current nth term
+     * @param nMinus1Solutions double[] of nth minus 1 term
+     * @return double error calculated.
+     */
     private static double calculateError(double[] nSolutions, double[] nMinus1Solutions){
         double squaredSum = 0;
         for (int i = 0; i < nSolutions.length; i++){
@@ -88,6 +99,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return returnError;
     }
 
+    /**
+     * Method to convert integer to double array.
+     * @param intArray int[] array
+     * @return double[] array
+     */
     private static double[] intArrayToDoubleArray(int[] intArray){
         double[] returnDoubleArray = new double[intArray.length];
         for (int i = 0; i < intArray.length; i++){
@@ -96,6 +112,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return returnDoubleArray;
     }
 
+    /**
+     * Calculates L2 by squaring all values in a double[] array and square rooting the sum.
+     * @param solutions double[] array of values to calculate L2.
+     * @return double value of L2.
+     */
     private static double calculateL2(double[] solutions){
         double squaredSum = 0;
         for (int i = 0; i < solutions.length; i++){
@@ -106,6 +127,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return returnSquareRoot;
     }
 
+    /**
+     * One iteration of the Jacobi Method.
+     * @param solutions double[] of the nth solution row
+     * @return double[] of the nth plus 1 solution row
+     */
     private static double[] jacobiIterateOnce(double[] solutions){
         // Let Ax1 + Bx2 + Cx3 = D  (times 3 different rows)
         // Then x1 = 1/A * (D - Bx2 - Cx3)  (This equation is used for commenting)
@@ -125,6 +151,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return newSolutions;
     }
 
+    /**
+     * One iteration of Gauss-Seidel method.
+     * @param solutions double[] of the nth solution row.
+     * @return double[] of the nth plus 1 solution row.
+     */
     private static double[] gaussSeidelIterateOnce(double[] solutions){
         // Let Ax1 + Bx2 + Cx3 = D  (times 3 different rows)
         // Then x1 = 1/A * (D - Bx2 - Cx3)  (This equation is used for commenting)
@@ -198,8 +229,12 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         }
     }
 
+    /**
+     * Method to get the starting solutions of the matrix. Looks like "0 0 0" for length of matrix.
+     * @return int[] array of the starting solutions corresponding to each row.
+     */
     private static int[] getStartingSolutions(){
-        userInput.nextLine();   // shift to prevent counting error from previous quesitons.
+        userInput.nextLine();   // shift to prevent counting error from previous questions.
         int numSolutions = augmentedCoefficientMatrix.length;
         int[] returnStartingSolutions = new int[augmentedCoefficientMatrix.length];
         while (true) {
@@ -264,6 +299,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         }
     }
 
+    /**
+     * Check to see if matrix is diagonally dominant by comparing diagonal to each value in each row (except equals)
+     * @param matrix int[][] array of the coefficient matrix set by user.
+     * @return boolean, true when matrix is diagonally dominant, false otherwise.
+     */
     private static boolean isDiagonallyDominant(int[][] matrix){
         for (int row = 0; row < matrix.length; row++){
             int diagonalInteger = matrix[row][row];
