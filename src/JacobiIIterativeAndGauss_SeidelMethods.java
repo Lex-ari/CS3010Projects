@@ -43,10 +43,49 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
                 System.out.println("Input not a double.");
             }
         }
-        userInput.nextLine();
+        startingSolutions = getStartingSolutions();
         System.out.println("Solving: ");
-        double[] jacobiSolutions = intArrayToDoubleArray(startingSolutions);
 
+        // Jacobi Method
+        double[] nSolutions = intArrayToDoubleArray(startingSolutions);
+        double[] nMinus1Solutions;
+        int i = 0;
+        do {
+            nMinus1Solutions = copyArray(nSolutions);
+            nSolutions = jacobiIterateOnce(nSolutions);
+            System.out.println(Arrays.toString(nSolutions));
+            i++;
+        } while (i < 50 && calculateError(nSolutions, nMinus1Solutions) > stoppingError);
+
+        System.out.println();
+
+        // Gauss-Seidel Method
+        nSolutions = intArrayToDoubleArray(startingSolutions);
+        i = 0;
+        do {
+            nMinus1Solutions = copyArray(nSolutions);
+            nSolutions = gaussSeidelIterateOnce(nSolutions);
+            System.out.println(Arrays.toString(nSolutions));
+            i++;
+        } while (i < 50 && calculateError(nSolutions, nMinus1Solutions) > stoppingError);
+    }
+
+    private static double[] copyArray(double[] array){
+        double[] returnArray = new double[array.length];
+        for (int i = 0; i < array.length; i++){
+            returnArray[i] = array[i];
+        }
+        return returnArray;
+    }
+
+    private static double calculateError(double[] nSolutions, double[] nMinus1Solutions){
+        double squaredSum = 0;
+        for (int i = 0; i < nSolutions.length; i++){
+            squaredSum += Math.pow((nSolutions[i] - nMinus1Solutions[i]), 2);
+        }
+        double returnError = Math.sqrt(squaredSum) / calculateL2(nSolutions);
+        //System.out.println("Error of current iteration: " + returnError);
+        return returnError;
     }
 
     private static double[] intArrayToDoubleArray(int[] intArray){
@@ -57,7 +96,17 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         return returnDoubleArray;
     }
 
-    private static double[] jacobiIterateOnce(){
+    private static double calculateL2(double[] solutions){
+        double squaredSum = 0;
+        for (int i = 0; i < solutions.length; i++){
+            squaredSum += solutions[i] * solutions[i];
+        }
+        double returnSquareRoot = Math.sqrt(squaredSum);
+        //System.out.println("L2 of current iteration: " + returnSquareRoot);
+        return returnSquareRoot;
+    }
+
+    private static double[] jacobiIterateOnce(double[] solutions){
         // Let Ax1 + Bx2 + Cx3 = D  (times 3 different rows)
         // Then x1 = 1/A * (D - Bx2 - Cx3)  (This equation is used for commenting)
         //other ex:
@@ -65,11 +114,30 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         // x3 = 1/C (D - Ax2 - Bx2)
         double[] newSolutions = new double[augmentedCoefficientMatrix.length];
         for (int row = 0; row < augmentedCoefficientMatrix.length; row++){
-            double sum = augmentedCoefficientMatrix[row][augmentedCoefficientMatrix[row].length];   // D
-            for (int col = 0; col < augmentedCoefficientMatrix[row].length - 1 && col != row; row++){
-                sum -= col * startingSolutions[col];    // (D - Bx2 - Cx3)
+            double sum = augmentedCoefficientMatrix[row][augmentedCoefficientMatrix[row].length - 1];   // D
+            for (int col = 0; col < augmentedCoefficientMatrix.length; col++){
+                if (col != row){
+                    sum -= augmentedCoefficientMatrix[row][col] * solutions[col]; // (D - Bx2 - Cx3)
+                }
             }
-            newSolutions[row] = sum / startingSolutions[row];   // 1/A *
+            newSolutions[row] = sum / augmentedCoefficientMatrix[row][row];   // 1/A *
+        }
+        return newSolutions;
+    }
+
+    private static double[] gaussSeidelIterateOnce(double[] solutions){
+        // Let Ax1 + Bx2 + Cx3 = D  (times 3 different rows)
+        // Then x1 = 1/A * (D - Bx2 - Cx3)  (This equation is used for commenting)
+
+        double[] newSolutions = solutions;
+        for (int row = 0; row < augmentedCoefficientMatrix.length; row++){
+            double sum = augmentedCoefficientMatrix[row][augmentedCoefficientMatrix[row].length - 1];   // D
+            for (int col = 0; col < augmentedCoefficientMatrix.length; col++){
+                if (col != row){
+                    sum -= augmentedCoefficientMatrix[row][col] * solutions[col]; // (D - Bx2 - Cx3)
+                }
+            }
+            newSolutions[row] = sum / augmentedCoefficientMatrix[row][row];   // 1/A *
         }
         return newSolutions;
     }
@@ -82,7 +150,7 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         int numEquations = 0;
         while (true){
             try {
-                System.out.println("Please enter the number of equations used for the Gaussian elimination with Scaled Partial Pivoting");
+                System.out.println("Please enter the number of equations used for Jacobi and Gauss-Seidel method");
                 numEquations = userInput.nextInt();
                 break;
             } catch (Exception e){
@@ -121,6 +189,28 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
             }
         }
         return returnMatrix;
+    }
+
+    private static int[] getStartingSolutions(){
+        userInput.nextLine();   // shift to prevent counting error from previous quesitons.
+        int numSolutions = augmentedCoefficientMatrix.length;
+        int[] returnStartingSolutions = new int[augmentedCoefficientMatrix.length];
+        while (true) {
+            try {
+                System.out.println("Enter the starting solutions in the format, \"0 0 0\"");
+                String currentLine = userInput.nextLine();
+                Scanner coefficientScanner = new Scanner(currentLine);
+                for (int i = 0; i < returnStartingSolutions.length; i++){
+                    if (coefficientScanner.hasNextInt()){
+                        returnStartingSolutions[i] = coefficientScanner.nextInt();
+                    }
+                }
+                break;
+            } catch (Exception e) {
+                System.out.println("Error: Unreadable Input. Please try again (inputs MUST be integers!)");
+            }
+        }
+        return returnStartingSolutions;
     }
 
     /***
