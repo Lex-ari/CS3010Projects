@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class JacobiIIterativeAndGauss_SeidelMethods {
 
-    private static double[][] augmentedCoefficientMatrix;
+    private static int[][] augmentedCoefficientMatrix;
     private static Scanner userInput = new Scanner(System.in);
     private static int[] startingSolutions;
     private static double stoppingError;
@@ -146,7 +146,7 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
      * Asks user to input number of equations and then input each row for the number of equations.
      * @return a matrix of the coefficients if user gives correct input of coefficients.
      */
-    private static double[][] getACMFromUser(){
+    private static int[][] getACMFromUser(){
         int numEquations = 0;
         while (true){
             try {
@@ -157,38 +157,45 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
                 System.out.println("Error: Unreadable Input. Please try again (input MUST be an integer!)");
             }
         }
-        int numCoefficients = numEquations + 1;
-        ArrayList<ArrayList<Integer>> rowLists = new ArrayList<ArrayList<Integer>>();
         userInput.nextLine();   // shift to prevent counting error from previous quesitons.
-        for (int i = 0; i < numEquations; i++){
-            while (true) {
-                try {
-                    System.out.println("Enter each coefficient in row " + i + ". Ex: 2x+3y+0z=8 = \"2 3 0 8\".");
-                    String currentLine = userInput.nextLine();
-                    Scanner coefficientScanner = new Scanner(currentLine);
-                    ArrayList coefficientList = new ArrayList();
-                    while (coefficientScanner.hasNextInt()){
-                        coefficientList.add(coefficientScanner.nextInt());
+        while (true) {
+            int numCoefficients = numEquations + 1;
+            ArrayList<ArrayList<Integer>> rowLists = new ArrayList<ArrayList<Integer>>();
+
+            for (int i = 0; i < numEquations; i++) {
+                while (true) {
+                    try {
+                        System.out.println("Enter each coefficient in row " + i + ". Ex: 2x+3y+0z=8 = \"2 3 0 8\".");
+                        String currentLine = userInput.nextLine();
+                        Scanner coefficientScanner = new Scanner(currentLine);
+                        ArrayList coefficientList = new ArrayList();
+                        while (coefficientScanner.hasNextInt()) {
+                            coefficientList.add(coefficientScanner.nextInt());
+                        }
+                        if (coefficientList.size() > numCoefficients) {
+                            System.out.println("Error: Incorrect number of coefficients. Expected: " + numCoefficients + " got: " + coefficientList.size());
+                            continue;
+                        }
+                        rowLists.add(coefficientList);
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("Error: Unreadable Input. Please try again (inputs MUST be integers!)");
                     }
-                    if (coefficientList.size() > numCoefficients){
-                        System.out.println("Error: Incorrect number of coefficients. Expected: " + numCoefficients + " got: " + coefficientList.size());
-                        continue;
-                    }
-                    rowLists.add(coefficientList);
-                    break;
-                } catch (Exception e) {
-                    System.out.println("Error: Unreadable Input. Please try again (inputs MUST be integers!)");
                 }
             }
-        }
-        int cols = rowLists.get(0).size();
-        double[][] returnMatrix = new double[numEquations][cols];
-        for (int y = 0; y < numEquations; y++){
-            for (int x = 0; x < cols; x++){
-                returnMatrix[y][x] = rowLists.get(y).get(x);
+            int cols = rowLists.get(0).size();
+            int[][] returnMatrix = new int[numEquations][cols];
+            for (int y = 0; y < numEquations; y++) {
+                for (int x = 0; x < cols; x++) {
+                    returnMatrix[y][x] = rowLists.get(y).get(x);
+                }
+            }
+            if (isDiagonallyDominant(returnMatrix)) {
+                return returnMatrix;
+            } else {
+                System.out.println("Error: Matrix is not diagonally dominant!");
             }
         }
-        return returnMatrix;
     }
 
     private static int[] getStartingSolutions(){
@@ -217,38 +224,56 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
      * Asks users for the name of a file
      * @return a matrix of the coefficients if the file is found.
      */
-    private static double[][] getACMFromFile(){
+    private static int[][] getACMFromFile(){
         ArrayList<ArrayList<Integer>> rowLists = new ArrayList<ArrayList<Integer>>();
-        while (true){
-            System.out.println("Enter the name of the file");
-            String fileName = userInput.nextLine();
-            try {
-                FileReader fileReader = new FileReader(fileName);
-                Scanner fileScanner = new Scanner(fileReader);
-                while (fileScanner.hasNextLine()){
-                    String currentLine = fileScanner.nextLine();
-                    ArrayList coefficientList = new ArrayList();
-                    Scanner coefficientScanner = new Scanner(currentLine);
-                    while (coefficientScanner.hasNextInt()){
-                        coefficientList.add(coefficientScanner.nextInt());
+        while (true) {
+            while (true) {
+                System.out.println("Enter the name of the file");
+                String fileName = userInput.nextLine();
+                try {
+                    FileReader fileReader = new FileReader(fileName);
+                    Scanner fileScanner = new Scanner(fileReader);
+                    while (fileScanner.hasNextLine()) {
+                        String currentLine = fileScanner.nextLine();
+                        ArrayList coefficientList = new ArrayList();
+                        Scanner coefficientScanner = new Scanner(currentLine);
+                        while (coefficientScanner.hasNextInt()) {
+                            coefficientList.add(coefficientScanner.nextInt());
+                        }
+                        rowLists.add(coefficientList);
                     }
-                    rowLists.add(coefficientList);
+                    fileReader.close();
+                    break;
+                } catch (IOException e) {
+                    System.out.println("Error: Unable to get file: " + fileName + ", please try again.");
                 }
-                fileReader.close();
-                break;
-            } catch (IOException e){
-                System.out.println("Error: Unable to get file: " + fileName + ", please try again.");
+            }
+            int rows = rowLists.size();
+            int cols = rowLists.get(0).size();
+            int[][] returnMatrix = new int[rows][cols];
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < cols; x++) {
+                    returnMatrix[y][x] = rowLists.get(y).get(x);
+                }
+            }
+            if (isDiagonallyDominant(returnMatrix)) {
+                return returnMatrix;
+            } else {
+                System.out.println("Error: Matrix is not diagonally dominant!");
             }
         }
-        int rows = rowLists.size();
-        int cols = rowLists.get(0).size();
-        double[][] returnMatrix = new double[rows][cols];
-        for (int y = 0; y < rows; y++){
-            for (int x = 0; x < cols; x++){
-                returnMatrix[y][x] = rowLists.get(y).get(x);
+    }
+
+    private static boolean isDiagonallyDominant(int[][] matrix){
+        for (int row = 0; row < matrix.length; row++){
+            int diagonalInteger = matrix[row][row];
+            for (int col = 0; col < matrix[row].length - 2; col++){
+                if (row != col && matrix[row][col] >= diagonalInteger){
+                    return false;
+                }
             }
         }
-        return returnMatrix;
+        return true;
     }
 
 

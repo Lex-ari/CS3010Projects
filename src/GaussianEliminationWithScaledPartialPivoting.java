@@ -226,39 +226,37 @@ public class GaussianEliminationWithScaledPartialPivoting {
      * Asks users for the name of a file
      * @return a matrix of the coefficients if the file is found.
      */
-    private static double[][] getACMFromFile(){
+    private static double[][] getACMFromFile() {
         ArrayList<ArrayList<Integer>> rowLists = new ArrayList<ArrayList<Integer>>();
-        while (true){
+        while (true) {
             System.out.println("Enter the name of the file");
             String fileName = userInput.nextLine();
             try {
                 FileReader fileReader = new FileReader(fileName);
                 Scanner fileScanner = new Scanner(fileReader);
-                while (fileScanner.hasNextLine()){
+                while (fileScanner.hasNextLine()) {
                     String currentLine = fileScanner.nextLine();
                     ArrayList coefficientList = new ArrayList();
                     Scanner coefficientScanner = new Scanner(currentLine);
-                    while (coefficientScanner.hasNextInt()){
+                    while (coefficientScanner.hasNextInt()) {
                         coefficientList.add(coefficientScanner.nextInt());
                     }
                     rowLists.add(coefficientList);
                 }
                 fileReader.close();
                 break;
-            } catch (IOException e){
+            } catch (IOException e) {
                 System.out.println("Error: Unable to get file: " + fileName + ", please try again.");
             }
         }
         int rows = rowLists.size();
         int cols = rowLists.get(0).size();
         double[][] returnMatrix = new double[rows][cols];
-        for (int y = 0; y < rows; y++){
-            for (int x = 0; x < cols; x++){
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
                 returnMatrix[y][x] = rowLists.get(y).get(x);
             }
         }
         return returnMatrix;
     }
-
-
 }
