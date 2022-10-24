@@ -91,11 +91,11 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
      */
     private static double calculateError(double[] nSolutions, double[] nMinus1Solutions){
         double squaredSum = 0;
-        for (int i = 0; i < nSolutions.length; i++){
-            squaredSum += Math.pow((nSolutions[i] - nMinus1Solutions[i]), 2);
+        double[] xNMinusXNMinus1Values = copyArray(nSolutions);
+        for (int i = 0; i < xNMinusXNMinus1Values.length; i++){
+            xNMinusXNMinus1Values[i] -= nMinus1Solutions[i];
         }
-        double returnError = Math.sqrt(squaredSum) / calculateL2(nSolutions);
-        //System.out.println("Error of current iteration: " + returnError);
+        double returnError = calculateL2(xNMinusXNMinus1Values) / calculateL2(nSolutions);
         return returnError;
     }
 
