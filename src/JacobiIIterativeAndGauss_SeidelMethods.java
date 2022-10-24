@@ -160,15 +160,16 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
         // Let Ax1 + Bx2 + Cx3 = D  (times 3 different rows)
         // Then x1 = 1/A * (D - Bx2 - Cx3)  (This equation is used for commenting)
 
-        double[] newSolutions = solutions;
+        double[] newSolutions = copyArray(solutions);
         for (int row = 0; row < augmentedCoefficientMatrix.length; row++){
             double sum = augmentedCoefficientMatrix[row][augmentedCoefficientMatrix[row].length - 1];   // D
             for (int col = 0; col < augmentedCoefficientMatrix.length; col++){
                 if (col != row){
-                    sum -= augmentedCoefficientMatrix[row][col] * solutions[col]; // (D - Bx2 - Cx3)
+                    sum -= augmentedCoefficientMatrix[row][col] * newSolutions[col]; // (D - Bx2 - Cx3)
                 }
             }
             newSolutions[row] = sum / augmentedCoefficientMatrix[row][row];   // 1/A *
+            // newSolutions[row] is the x(row) term found.
         }
         return newSolutions;
     }
