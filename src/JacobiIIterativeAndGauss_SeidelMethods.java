@@ -44,30 +44,43 @@ public class JacobiIIterativeAndGauss_SeidelMethods {
             }
         }
         startingSolutions = getStartingSolutions();
-        System.out.println("Solving: ");
+        System.out.println("Solving: \n");
 
         // Jacobi Method
+        System.out.println("Jacobi Method");
         double[] nSolutions = intArrayToDoubleArray(startingSolutions);
         double[] nMinus1Solutions;
         int i = 0;
+        double error;
         do {
             nMinus1Solutions = copyArray(nSolutions);
             nSolutions = jacobiIterateOnce(nSolutions);
             System.out.println(Arrays.toString(nSolutions));
+            error = calculateError(nSolutions, nMinus1Solutions);
             i++;
-        } while (i < 50 && calculateError(nSolutions, nMinus1Solutions) > stoppingError);
+        } while (i < 50 && error > stoppingError);
+        if (error > stoppingError){
+            System.out.println("Desired Error was not reached");
+        }
+        System.out.println("Solutions: " + Arrays.toString(nSolutions));
 
         System.out.println();
 
         // Gauss-Seidel Method
+        System.out.println("Gauss-Seidel Method");
         nSolutions = intArrayToDoubleArray(startingSolutions);
         i = 0;
         do {
             nMinus1Solutions = copyArray(nSolutions);
             nSolutions = gaussSeidelIterateOnce(nSolutions);
             System.out.println(Arrays.toString(nSolutions));
+            error = calculateError(nSolutions, nMinus1Solutions);
             i++;
-        } while (i < 50 && calculateError(nSolutions, nMinus1Solutions) > stoppingError);
+        } while (i < 50 && error > stoppingError);
+        if (error > stoppingError){
+            System.out.println("Desired Error was not reached");
+        }
+        System.out.println("Solutions: " + Arrays.toString(nSolutions));
     }
 
     /**
