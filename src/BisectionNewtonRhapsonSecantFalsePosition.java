@@ -19,6 +19,7 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
     private static Scanner userInput = new Scanner(System.in);
     private static int[] startingSolutions;
     private static final double DEFAULT_STOPPING_ERROR = 0.01;
+    private static double error = 0;
     public static void main(String[] args){
 
         //Hardcoded
@@ -31,20 +32,81 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         double currentError;
         int iteration;
         for (function currentFunction : equations){
-            values = new double[]{0, 4, currentFunction.getValue(0), currentFunction.getValue(1)};
-            iteration = 0;
-            currentError = (values[1] - values[0])/2;
-            while (currentError > DEFAULT_STOPPING_ERROR && iteration <= 100 ){
-                System.out.println(iteration + " " + Arrays.toString(values) + " " + currentError);
-                currentError = (values[1] - values[0])/Math.pow(2, iteration + 2);
-                values = bisectionOnce(values, currentFunction);
-                iteration++;
-            }
-        }
 
+            //bisection
+            System.out.println("Enter integers a and b for Bisection Method");
+            double a = getIntegerFromUser();
+            double b = getIntegerFromUser();
+            values = new double[]{a, b, currentFunction.getValue(a), currentFunction.getValue(b)};
+            iteration = 0;
+            error = (values[1] - values[0]);
+            System.out.printf("%3s %8s %8s %8s %8s %8s %8s %8s%n","i", "a", "b", "f(a)", "f(b)", "c", "f(c)", "error");
+            do{
+                error /= 2;
+                System.out.printf("%3d ", iteration);
+                values = bisectionOnce(values, currentFunction);
+                System.out.printf("%8.4f%n", error);
+                iteration++;
+            } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            System.out.println();
+
+            //newton-raphson
+            System.out.println("Enter integer xn for Newton-Raphson Method");
+            double xn = getIntegerFromUser();
+            error = Math.abs(currentFunction.getValue(xn));
+            System.out.printf("%3s %8s %8s %8s %8s %8s%n", "i", "xn", "f(xn)", "f'(xn)", "f(xn+1)", "error");
+            iteration = 0;
+            do {
+                System.out.printf("%3d ", iteration);
+                xn = newtonRaphsonOnce(xn, currentFunction);
+                iteration++;
+            } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            System.out.println();
+
+            //false position
+            System.out.println("Enter integers a and b for False-Position Method");
+            a = getIntegerFromUser();
+            b = getIntegerFromUser();
+            values = new double[]{a, b, currentFunction.getValue(a), currentFunction.getValue(b)};
+            iteration = 0;
+            error = (values[1] - values[0]);
+            System.out.printf("%3s %8s %8s %8s %8s %8s %8s %8s%n","i", "a", "b", "f(a)", "f(b)", "c", "f(c)", "error");
+            do{
+                error /= 2;
+                System.out.printf("%3d ", iteration);
+                values = falsePositionOnce(values, currentFunction);
+                System.out.printf("%8.4f%n", error);
+                iteration++;
+            } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            System.out.println();
+
+            //secant
+            System.out.println("Enter integers xnminus1 and xn for Secant Method");
+            double xnminus1 = getIntegerFromUser();
+            xn = getIntegerFromUser();
+            values = new double[]{xnminus1, xn, currentFunction.getValue(xnminus1), currentFunction.getValue(xn)};
+            iteration = 0;
+            System.out.printf("%3s %8s %8s %8s %8s %8s %8s%n","i", "xn-1", "xn", "f(xn-1)", "f(xn)", "xn+1", "error");
+            do{
+                error = Math.abs(values[1]-values[0]);
+                System.out.printf("%3d ", iteration);
+                values = secantOnce(values, currentFunction);
+                System.out.printf("%8.4f%n", error);
+                iteration++;
+            } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+        }
     }
 
-    // double values = {a, b, fa, fb, function, stoppingError}
+    private static boolean bisectionOK(double a, double b){
+        boolean test = a * b < 0;
+        if (!test){
+            
+            return false;
+        }
+        return true;
+    }
+
+    // double values = {a, b, fa, fb}
     private static double[] bisectionOnce(double[] values, function function){
         double a = values[0];
         double b = values[1];
@@ -52,28 +114,35 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         double fb = values[3];
         double c = (b + a)/2.0;
         double fc = function.getValue(c);
+        printValues(values);
+        System.out.printf("%8.4f %8.4f ", c, fc);
         if (fa * fc >= 0){ // if f(a) and f(c) have same sign
             values = new double[]{c, b, fc, fb};
         } else {
-            values = new double[]{fa, c, fc, fc};
+            values = new double[]{a, c, fc, fc};
         }
         return values;
     }
-
-    private static double newtonRaphsonOnce(double xn, function function, double stoppingError){
+    // double values = {xn}
+    private static double newtonRaphsonOnce(double xn, function function){
         double fn = function.getValue(xn);
         double fprimen = function.getFirstDerivative(xn);
-        return xn - fn / fprimen;
+        double xnplus1 = xn - fn / fprimen;
+        error = Math.abs(function.getValue(xnplus1));
+        System.out.printf("%8.4f %8.4f %8.4f %8.4f %8.4f%n", xn, fn, fprimen, xnplus1, error);
+        return xnplus1;
     }
 
     // double values = {a, b, fa, fb}
-    private static double[] falsePositionOnce(double[] values, function function, double stoppingError){
+    private static double[] falsePositionOnce(double[] values, function function){
         double a = values[0];
         double b = values[1];
         double fa = values[2];
         double fb = values[3];
         double c = (a*fb - b*fa)/(fb - fa);
         double fc = function.getValue(c);
+        printValues(values);
+        System.out.printf("%8.4f %8.4f ", c, fc);
         if (fa * fc >= 0){ // if f(a) and f(c) have same sign
             return new double[]{c, b, fc, fb};
         } else {
@@ -82,40 +151,31 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
     }
 
     // double values = {xn-1, xn, f(xn-1), f(xn)}
-    private static double[] secantOnce(double[] values, function function, double stoppingError){
+    private static double[] secantOnce(double[] values, function function){
         double xnminus1 = values[0];
         double xn = values[1];
         double fxnminus1 = values[2];
         double fxn = values[3];
         double xnplus1 = xn - ((xn - xnminus1) / (fxn - fxnminus1)) * fxn;
+        printValues(values);
+        System.out.printf("%8.4f, ", xnplus1);
         return new double[]{xn, xnplus1, fxn, function.getValue(xnplus1)};
     }
 
-    /**
-     * Copies each value of a double[] array to a new double[] array
-     * @param array double[] to copy from
-     * @return double[] to copy to.
-     */
-    private static double[] copyArray(double[] array){
-        double[] returnArray = new double[array.length];
-        for (int i = 0; i < array.length; i++){
-            returnArray[i] = array[i];
+    private static void printVariables(int iteration, double[] values, double stoppingError){
+        System.out.print(iteration + " ");
+        for (double value : values){
+            System.out.printf("%8.4f ", value);
         }
-        return returnArray;
+        System.out.printf("%8.4f%n", stoppingError);
     }
 
-    /**
-     * Method to convert integer to double array.
-     * @param intArray int[] array
-     * @return double[] array
-     */
-    private static double[] intArrayToDoubleArray(int[] intArray){
-        double[] returnDoubleArray = new double[intArray.length];
-        for (int i = 0; i < intArray.length; i++){
-            returnDoubleArray[i] = intArray[i];
+    private static void printValues(double[] values){
+        for (double value : values){
+            System.out.printf("%8.4f ", value);
         }
-        return returnDoubleArray;
     }
+
 
     interface function {
         public double getValue(double x);
@@ -142,6 +202,23 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             //f'(x) = 1 - ((50 * sinh(50/x)) / x) + cosh(50/x)
         public double getFirstDerivative(double x){
             return 1.0 - (50.0*Math.sinh(50.0/x))/x + Math.cosh(50.0/x);
+        }
+    }
+
+
+    /**
+     * Method to get integer from the user
+     * @return integer
+     */
+    private static double getIntegerFromUser(){
+        //userInput.nextLine();   // shift to prevent counting error from previous questions.
+        while (true) {
+            try {
+                System.out.println("Enter an integer");
+                return userInput.nextDouble();
+            } catch (Exception e) {
+                System.out.println("Error: Unreadable Input. Please try again (input MUST be an integer!)");
+            }
         }
     }
 }
