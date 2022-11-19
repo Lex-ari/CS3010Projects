@@ -75,23 +75,25 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
     }
 
     class functionOne implements function {
-        //f(x)=2x^3-11.7x^2+17.7x-5
+        //f(x) = 2x^3 - 11.7x^2 + 17.7x - 5
         public double getValue(double x){
-            return x;
+            return 2.0*x*x*x - 11.7*x*x + 17.7*x - 5.0;
         }
 
+        //f'(x) = 6x^2 - 23.4x + 17.7
         public double getFirstDerivative(double x){
-            return x;
+            return 6.0*x*x - 23.4*x + 17.5;
         }
     }
 
     class functionTwo implements function {
-        //f(x)=x+10-xcosh(50/x)
-        public double getValue(double x){
-            return x;
+        //f(x) = x + 10 - xcosh(50/x)
+        public double getValue(double x) {
+            return x + 10.0 - x * Math.cosh(50.0 / x);
         }
+            //f'(x) = 1 - ((50 * sinh(50/x)) / x) + cosh(50/x)
         public double getFirstDerivative(double x){
-            return x;
+            return 1.0 - (50.0*Math.sinh(50.0/x))/x + Math.cosh(50.0/x);
         }
     }
 }
