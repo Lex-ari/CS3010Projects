@@ -1,5 +1,6 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -25,6 +26,23 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         //f(x)=x+10-xcosh(50/x)
     }
 
+    private static double[] bisectionOnce(double a, double b, function function, double stoppingError){
+        return new double[0];
+    }
+
+    private static double[] newtonRaphsonOnce(double xn, function function, double stoppingError){
+        return new double[0];
+    }
+
+    private static double[] falsePositionOnce(double a, double b, function function, double stoppingError){
+        return new double[0];
+    }
+
+    private static double[] secantOnce(double xnminus1, double x, function function, double stoppingError){
+        return new double[0];
+    }
+
+
     /**
      * Copies each value of a double[] array to a new double[] array
      * @param array double[] to copy from
@@ -49,5 +67,31 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             returnDoubleArray[i] = intArray[i];
         }
         return returnDoubleArray;
+    }
+
+    interface function {
+        public double getValue(double x);
+        public double getFirstDerivative(double x);
+    }
+
+    class functionOne implements function {
+        //f(x)=2x^3-11.7x^2+17.7x-5
+        public double getValue(double x){
+            return x;
+        }
+
+        public double getFirstDerivative(double x){
+            return x;
+        }
+    }
+
+    class functionTwo implements function {
+        //f(x)=x+10-xcosh(50/x)
+        public double getValue(double x){
+            return x;
+        }
+        public double getFirstDerivative(double x){
+            return x;
+        }
     }
 }
