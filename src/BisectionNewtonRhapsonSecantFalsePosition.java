@@ -32,11 +32,20 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         double currentError;
         int iteration;
         for (function currentFunction : equations){
+            double a;
+            double b;
+            double xn;
+            double xnminus1;
 
             //bisection
-            System.out.println("Enter integers a and b for Bisection Method");
-            double a = getIntegerFromUser();
-            double b = getIntegerFromUser();
+            while (true){
+                System.out.println("Enter integers a and b for Bisection Method");
+                a = getIntegerFromUser();
+                b = getIntegerFromUser();
+                if (uvCheck(a, b, currentFunction)){
+                    break;
+                }
+            }
             values = new double[]{a, b, currentFunction.getValue(a), currentFunction.getValue(b)};
             iteration = 0;
             error = (values[1] - values[0]);
@@ -51,8 +60,14 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             System.out.println();
 
             //newton-raphson
-            System.out.println("Enter integer xn for Newton-Raphson Method");
-            double xn = getIntegerFromUser();
+            while (true){
+                System.out.println("Enter integer xn for Newton-Raphson Method");
+                xn = getIntegerFromUser();
+                if (newtonCheck(xn, currentFunction)){
+                    break;
+                }
+            }
+            xnminus1 = xn;
             error = Math.abs(currentFunction.getValue(xn));
             System.out.printf("%3s %8s %8s %8s %8s %8s%n", "i", "xn", "f(xn)", "f'(xn)", "f(xn+1)", "error");
             iteration = 0;
@@ -60,13 +75,23 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
                 System.out.printf("%3d ", iteration);
                 xn = newtonRaphsonOnce(xn, currentFunction);
                 iteration++;
+
+                if (!newtonRunawayCheck(xnminus1, xn)){
+                    break;
+                }
+                xnminus1 = xn;
             } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
             System.out.println();
 
             //false position
-            System.out.println("Enter integers a and b for False-Position Method");
-            a = getIntegerFromUser();
-            b = getIntegerFromUser();
+            while (true){
+                System.out.println("Enter integers a and b for False-Position Method");
+                a = getIntegerFromUser();
+                b = getIntegerFromUser();
+                if (uvCheck(a, b, currentFunction)){
+                    break;
+                }
+            }
             values = new double[]{a, b, currentFunction.getValue(a), currentFunction.getValue(b)};
             iteration = 0;
             error = (values[1] - values[0]);
@@ -81,9 +106,14 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             System.out.println();
 
             //secant
-            System.out.println("Enter integers xnminus1 and xn for Secant Method");
-            double xnminus1 = getIntegerFromUser();
-            xn = getIntegerFromUser();
+            while (true){
+                System.out.println("Enter integers xnminus1 and xn for Secant Method");
+                xnminus1 = getIntegerFromUser();
+                xn = getIntegerFromUser();
+                if (div0Check(xnminus1, xn, currentFunction)){
+                    break;
+                }
+            }
             values = new double[]{xnminus1, xn, currentFunction.getValue(xnminus1), currentFunction.getValue(xn)};
             iteration = 0;
             System.out.printf("%3s %8s %8s %8s %8s %8s %8s%n","i", "xn-1", "xn", "f(xn-1)", "f(xn)", "xn+1", "error");
@@ -97,10 +127,34 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         }
     }
 
-    private static boolean bisectionOK(double a, double b){
-        boolean test = a * b < 0;
+    private static boolean uvCheck(double a, double b, function function){
+        boolean test = function.getValue(a) * function.getValue(b) < 0;
+        test = test && a != b;
         if (!test){
-            
+            System.out.println("Variables do not satisfy uv < 0! and a != b");
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean newtonCheck(double xn, function function){
+        if (Math.abs(function.getFirstDerivative(xn)) < 1E-9){
+            System.out.println("Flat Spot Error - Poor X0");
+            return false;
+        }
+        return true;
+    }
+    private static boolean newtonRunawayCheck(double xnminus1, double xn){
+        if (Math.abs(xn - xnminus1) > 1E3){
+            System.out.println("Possible Runaway Detected - Poor X0");
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean div0Check(double a, double b, function function){
+        if (Math.abs(function.getFirstDerivative(a) - function.getFirstDerivative(b)) < 1E-9){
+            System.out.println("Div 0 - Bad Points");
             return false;
         }
         return true;
