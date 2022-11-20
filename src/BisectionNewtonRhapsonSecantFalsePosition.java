@@ -1,8 +1,4 @@
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /***
@@ -14,12 +10,10 @@ import java.util.Scanner;
  */
 
 public class BisectionNewtonRhapsonSecantFalsePosition {
-
-    private static int[][] augmentedCoefficientMatrix;
     private static Scanner userInput = new Scanner(System.in);
-    private static int[] startingSolutions;
     private static final double DEFAULT_STOPPING_ERROR = 0.01;
     private static double error = 0;
+    private static ArrayList<Double> errorList = new ArrayList<Double>();
     public static void main(String[] args){
 
         //Hardcoded
@@ -29,7 +23,6 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         function secondEquation = new functionTwo();
         function[] equations = new function[]{firstEquation, secondEquation};
         double[] values;
-        double currentError;
         int iteration;
         for (function currentFunction : equations){
             double a;
@@ -39,7 +32,7 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
 
             //bisection
             while (true){
-                System.out.println("Enter integers a and b for Bisection Method");
+                System.out.println("Enter integers a and b for Bisection Method for equation: " + currentFunction.toString());
                 a = getIntegerFromUser();
                 b = getIntegerFromUser();
                 if (uvCheck(a, b, currentFunction)){
@@ -52,16 +45,19 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             System.out.printf("%3s %8s %8s %8s %8s %8s %8s %8s%n","i", "a", "b", "f(a)", "f(b)", "c", "f(c)", "error");
             do{
                 error /= 2;
+                errorList.add(error);
                 System.out.printf("%3d ", iteration);
                 values = bisectionOnce(values, currentFunction);
                 System.out.printf("%8.4f%n", error);
                 iteration++;
             } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            //printErrorList(errorList);
+            //errorList.clear();
             System.out.println();
 
             //newton-raphson
             while (true){
-                System.out.println("Enter integer xn for Newton-Raphson Method");
+                System.out.println("Enter integer xn for Newton-Raphson Method for equation: " + currentFunction.toString());
                 xn = getIntegerFromUser();
                 if (newtonCheck(xn, currentFunction)){
                     break;
@@ -69,23 +65,26 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             }
             xnminus1 = xn;
             error = Math.abs(currentFunction.getValue(xn));
-            System.out.printf("%3s %8s %8s %8s %8s %8s%n", "i", "xn", "f(xn)", "f'(xn)", "f(xn+1)", "error");
+            System.out.printf("%3s %8s %8s %8s %8s %8s%n", "i", "xn", "f(xn)", "f'(xn)", "xn+1", "error");
             iteration = 0;
             do {
+
                 System.out.printf("%3d ", iteration);
                 xn = newtonRaphsonOnce(xn, currentFunction);
                 iteration++;
-
                 if (!newtonRunawayCheck(xnminus1, xn)){
                     break;
                 }
+                //errorList.add(error);
                 xnminus1 = xn;
             } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            //printErrorList(errorList);
+            //errorList.clear();
             System.out.println();
 
             //false position
             while (true){
-                System.out.println("Enter integers a and b for False-Position Method");
+                System.out.println("Enter integers a and b for False-Position Method for equation: " + currentFunction.toString());
                 a = getIntegerFromUser();
                 b = getIntegerFromUser();
                 if (uvCheck(a, b, currentFunction)){
@@ -107,7 +106,7 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
 
             //secant
             while (true){
-                System.out.println("Enter integers xnminus1 and xn for Secant Method");
+                System.out.println("Enter integers xnminus1 and xn for Secant Method for equation: " + currentFunction.toString());
                 xnminus1 = getIntegerFromUser();
                 xn = getIntegerFromUser();
                 if (div0Check(xnminus1, xn, currentFunction)){
@@ -119,14 +118,25 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             System.out.printf("%3s %8s %8s %8s %8s %8s %8s%n","i", "xn-1", "xn", "f(xn-1)", "f(xn)", "xn+1", "error");
             do{
                 error = Math.abs(values[1]-values[0]);
+                errorList.add(error);
                 System.out.printf("%3d ", iteration);
                 values = secantOnce(values, currentFunction);
                 System.out.printf("%8.4f%n", error);
                 iteration++;
             } while (error > DEFAULT_STOPPING_ERROR && iteration <= 100 );
+            //printErrorList(errorList);
+            //errorList.clear();
         }
     }
 
+    /**
+     * UV Check: Ensure that Bisection and False-Position can use this set of values.
+     * Checks to see if opposite signs.
+     * @param a
+     * @param b
+     * @param function function that is currently being used to get f(a) and f(b).
+     * @return true if f(a) and f(b) are opposite signs. false otherwise.
+     */
     private static boolean uvCheck(double a, double b, function function){
         boolean test = function.getValue(a) * function.getValue(b) < 0;
         test = test && a != b;
@@ -137,6 +147,12 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         return true;
     }
 
+    /**
+     * Checks to ensure that the point at xn is not near 0. Otherwise it may be a flat spot.
+     * @param xn
+     * @param function currently used to find f'(xn)
+     * @return true if function is not near 0. false otherwise.
+     */
     private static boolean newtonCheck(double xn, function function){
         if (Math.abs(function.getFirstDerivative(xn)) < 1E-9){
             System.out.println("Flat Spot Error - Poor X0");
@@ -144,6 +160,13 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         }
         return true;
     }
+
+    /**
+     * Constant to check to determine possible runaway using Newton-Raphson method.
+     * @param xnminus1
+     * @param xn
+     * @return true if possible newtonRunawayCheck (stop iterating). False Otherwise.
+     */
     private static boolean newtonRunawayCheck(double xnminus1, double xn){
         if (Math.abs(xn - xnminus1) > 1E3){
             System.out.println("Possible Runaway Detected - Poor X0");
@@ -152,6 +175,13 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         return true;
     }
 
+    /**
+     * Simple divide by 0 check used for Secant Method.
+     * @param a
+     * @param b
+     * @param function currently being used to find f'(a) and f'(b)
+     * @return true if passes divide by 0 check. false otherwise.
+     */
     private static boolean div0Check(double a, double b, function function){
         if (Math.abs(function.getFirstDerivative(a) - function.getFirstDerivative(b)) < 1E-9){
             System.out.println("Div 0 - Bad Points");
@@ -160,7 +190,12 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         return true;
     }
 
-    // double values = {a, b, fa, fb}
+    /**
+     * Bisection Method
+     * @param values double[] = {a, b, fa, fb}
+     * @param function currently being used to find f(c)
+     * @return values for next iteration {a, b, fa, fb}, where a, b, fa, fb are swapped by c and fc according to Bisection rules.
+     */
     private static double[] bisectionOnce(double[] values, function function){
         double a = values[0];
         double b = values[1];
@@ -177,7 +212,14 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         }
         return values;
     }
-    // double values = {xn}
+
+    /**
+     * Newton-Raphson Method.
+     * @param xn
+     * @param function currently being used to find f'(xn) and f(x+1)
+     * @return xn+1 double.
+     * Note: Error and values are printed here.
+     */
     private static double newtonRaphsonOnce(double xn, function function){
         double fn = function.getValue(xn);
         double fprimen = function.getFirstDerivative(xn);
@@ -187,7 +229,12 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         return xnplus1;
     }
 
-    // double values = {a, b, fa, fb}
+    /**
+     * False-Position Method
+     * @param values double[] = {a, b, fa, fb}
+     * @param function currently being used to find f(c)
+     * @return values for next iteration {a, b, fa, fb}, where a, b, fa, fb are swapped by c and fc according to False-Position rules.
+     */
     private static double[] falsePositionOnce(double[] values, function function){
         double a = values[0];
         double b = values[1];
@@ -205,35 +252,43 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
     }
 
     // double values = {xn-1, xn, f(xn-1), f(xn)}
+
+    /**
+     * Secant Method
+     * @param values double[] = {xn-1, xn, f(xn-1), f(xn)}
+     * @param function currently being used to find f(xn+1)
+     * @return new double[] values = {xn-1, xn, f(xn-1), f(xn)} for next iteration with each value replaced according to Secant rules.
+     */
     private static double[] secantOnce(double[] values, function function){
         double xnminus1 = values[0];
         double xn = values[1];
         double fxnminus1 = values[2];
         double fxn = values[3];
-        double xnplus1 = xn - ((xn - xnminus1) / (fxn - fxnminus1)) * fxn;
+        double xnplus1 = xn - (((xn - xnminus1) / (fxn - fxnminus1)) * fxn);
         printValues(values);
         System.out.printf("%8.4f, ", xnplus1);
         return new double[]{xn, xnplus1, fxn, function.getValue(xnplus1)};
     }
 
-    private static void printVariables(int iteration, double[] values, double stoppingError){
-        System.out.print(iteration + " ");
-        for (double value : values){
-            System.out.printf("%8.4f ", value);
-        }
-        System.out.printf("%8.4f%n", stoppingError);
-    }
-
+    /**
+     * Prints all values with spacing
+     * @param values double[] array of values to print in same line.
+     */
     private static void printValues(double[] values){
         for (double value : values){
             System.out.printf("%8.4f ", value);
         }
     }
 
-
+    /**
+     * Function Interface
+     * Used to define a "function" and get values, derivatives, and toString.
+     */
     interface function {
         public double getValue(double x);
         public double getFirstDerivative(double x);
+        @Override
+        public String toString();
     }
 
     static class functionOne implements function {
@@ -246,6 +301,10 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
         public double getFirstDerivative(double x){
             return 6.0*x*x - 23.4*x + 17.5;
         }
+
+        public String toString(){
+            return "f(x) = 2x^3 - 11.7x^2 + 17.7x - 5";
+        }
     }
 
     static class functionTwo implements function {
@@ -256,6 +315,10 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
             //f'(x) = 1 - ((50 * sinh(50/x)) / x) + cosh(50/x)
         public double getFirstDerivative(double x){
             return 1.0 - (50.0*Math.sinh(50.0/x))/x + Math.cosh(50.0/x);
+        }
+
+        public String toString(){
+            return "f(x) = x + 10 - xcosh(50/x)";
         }
     }
 
@@ -272,7 +335,14 @@ public class BisectionNewtonRhapsonSecantFalsePosition {
                 return userInput.nextDouble();
             } catch (Exception e) {
                 System.out.println("Error: Unreadable Input. Please try again (input MUST be an integer!)");
+                userInput.nextLine();
             }
+        }
+    }
+
+    private static void printErrorList(ArrayList<Double> errorList){
+        for (Double value : errorList){
+            System.out.println(value);
         }
     }
 }
