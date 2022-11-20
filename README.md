@@ -14,3 +14,6 @@ Programming Project 1 - GaussianEliminationWithScaledPartialPivoting.java https:
 
 
 Programming Project 2 - JacobiIIterativeAndGauss_SeidelMethods.java https://github.com/Lex-ari/CS3010Projects/blob/main/src/JacobiIIterativeAndGauss_SeidelMethods.java
+
+
+Programming Project 3 - BisectionNewtonRhapsonSecantFalsePosition.java https://github.com/Lex-ari/CS3010Projects/blob/main/src/BisectionNewtonRhapsonSecantFalsePosition.java
