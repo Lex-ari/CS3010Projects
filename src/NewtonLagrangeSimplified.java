@@ -25,11 +25,11 @@ public class NewtonLagrangeSimplified {
         return new double[0];
     }
 
-    private static double[] doLagrangeMethod(double[] variables){
+    private static double[] doLagrangeMethod(double[][] variables){
         return new double[0];
     }
 
-    private static double[] doSimplifiedMethod(double[] variables){
+    private static double[] doSimplifiedMethod(double[][] variables){
         return new double[0];
     }
 
