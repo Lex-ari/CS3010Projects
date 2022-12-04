@@ -22,6 +22,7 @@ public class NewtonLagrangeSimplified {
         System.out.println("Solving: ");
         ArrayList<double[]> thing = doNewtonMethod(xAndFxValues[0],xAndFxValues[1]);
         printDividedDifferenceTable(thing);
+        printNewtonForm(thing);
         System.out.println("Done");
     }
 
@@ -36,12 +37,25 @@ public class NewtonLagrangeSimplified {
         System.out.println();
         for (int row = 0; row < rows; row++){
             for (int col = 0; col < cols - row; col++){
-                System.out.printf("% 2.7f ", unFormattedTable.get(col)[row]);
+                System.out.printf("%10.3f ", unFormattedTable.get(col)[row]);
             }
             System.out.println();
         }
     }
 
+    /***
+     * Rounds a double value if it is extremely close to an integer. Ex. 0.9999999999 --> 1.0
+     * @param value to be check if it is an integer
+     * @return rounded value, or value if it is not an integer.
+     */
+    private static double roundIfInteger(double value){
+        double floorSub = Math.abs(value - Math.floor(value));
+        double ceilingSub = Math.abs(value - Math.ceil(value));
+        if (floorSub < 1E-4 || ceilingSub < 1E-4){
+            return Math.round(value);
+        }
+        return value;
+    }
     /**
      * Uses Newton's Method and returns an Array List of each column (x, f[], f[,], f[,,], etc)
      * @param xVars initial starting x values
@@ -58,12 +72,26 @@ public class NewtonLagrangeSimplified {
             double[] returnFxValues = new double[workingFx.length - 1];
             for (int i = 0; i < returnFxValues.length; i++){
                 returnFxValues[i] = (workingFx[i + 1] - workingFx[i ]) / (xVars[i + offset] - xVars[i]);
+                returnFxValues[i] = roundIfInteger(returnFxValues[i]);
             }
             workingFx = Arrays.copyOf(returnFxValues, returnFxValues.length);
             fLayers.add(workingFx);
         } while (fLayers.get(fLayers.size() - 1).length > 1);
 
         return fLayers;
+    }
+
+    private static void printNewtonForm(ArrayList<double[]> unFormattedTable){
+        for (int col = 1; col < unFormattedTable.size(); col++){
+            if (col > 1){
+                System.out.print(" + ");
+            }
+            System.out.printf("%3.3f", unFormattedTable.get(col)[0]);
+            for (int row = 0; row < col - 1; row++){
+                System.out.printf("(x-%3.3f)", unFormattedTable.get(0)[row]);
+            }
+        }
+        System.out.println();
     }
 
     private static double[] doLagrangeMethod(double[][] variables){
