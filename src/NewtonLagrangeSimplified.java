@@ -28,9 +28,15 @@ public class NewtonLagrangeSimplified {
     private static void printDividedDifferenceTable(ArrayList<double[]> unFormattedTable){
         int cols = unFormattedTable.size();
         int rows = unFormattedTable.get(0).length;
+        System.out.printf("%10s ", "x");
+        for (int i = 0; i < cols - 1; i++){
+            String fString = "f[," + i + "]";
+            System.out.printf("%10s ", fString);
+        }
+        System.out.println();
         for (int row = 0; row < rows; row++){
             for (int col = 0; col < cols - row; col++){
-                System.out.printf("%2.8f ", unFormattedTable.get(col)[row]);
+                System.out.printf("% 2.7f ", unFormattedTable.get(col)[row]);
             }
             System.out.println();
         }
