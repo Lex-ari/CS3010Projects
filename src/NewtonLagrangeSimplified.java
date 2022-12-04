@@ -2,6 +2,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 /***
@@ -13,16 +14,36 @@ import java.util.Scanner;
  */
 
 public class NewtonLagrangeSimplified {
-    private static double[][] augmentedCoefficientMatrix;
+    private static double[][] xAndFxValues; // [0][] is x values, [1][] are f(x) values
     private static Scanner userInput = new Scanner(System.in);
     public static void main(String[] args){
-        augmentedCoefficientMatrix = getACMFromFile();
+        xAndFxValues = getACMFromFile();
 
         System.out.println("Solving: ");
+        ArrayList<double[]> thing = doNewtonMethod(xAndFxValues[0],xAndFxValues[1]);
+        System.out.println("Done");
     }
 
-    private static double[] doNewtonMethodOnce(double[] variables){
-        return new double[0];
+    /**
+     * Uses Newton's Method and returns an Array List of each column (x, f[], f[,], f[,,], etc)
+     * @param xVars initial starting x values
+     * @param fxVars initial starting f(x) values
+     * @return ArrayList of each column in double[] format (x, f[], f[,], f[,,], etc)
+     */
+    private static ArrayList<double[]> doNewtonMethod(double[] xVars, double[] fxVars){
+        ArrayList<double[]> fLayers = new ArrayList();
+        double[] workingFx = Arrays.copyOf(fxVars, fxVars.length);
+        do {
+            int offset = xVars.length - workingFx.length + 1;
+            double[] returnFxValues = new double[workingFx.length - 1];
+            for (int i = 0; i < returnFxValues.length; i++){
+                returnFxValues[i] = (workingFx[i + 1] - workingFx[i ]) / (xVars[i + offset] - xVars[i]);
+            }
+            workingFx = Arrays.copyOf(returnFxValues, returnFxValues.length);
+            fLayers.add(workingFx);
+        } while (fLayers.get(fLayers.size() - 1).length > 1);
+
+        return fLayers;
     }
 
     private static double[] doLagrangeMethod(double[][] variables){
@@ -39,7 +60,7 @@ public class NewtonLagrangeSimplified {
      * @return a matrix of the coefficients if the file is found.
      */
     private static double[][] getACMFromFile() {
-        ArrayList<ArrayList<Integer>> rowLists = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Double>> rowLists = new ArrayList<ArrayList<Double>>();
         while (true) {
             System.out.println("Enter the name of the file");
             String fileName = userInput.nextLine();
@@ -50,8 +71,8 @@ public class NewtonLagrangeSimplified {
                     String currentLine = fileScanner.nextLine();
                     ArrayList coefficientList = new ArrayList();
                     Scanner coefficientScanner = new Scanner(currentLine);
-                    while (coefficientScanner.hasNextInt()) {
-                        coefficientList.add(coefficientScanner.nextInt());
+                    while (coefficientScanner.hasNextDouble()) {
+                        coefficientList.add(coefficientScanner.nextDouble());
                     }
                     rowLists.add(coefficientList);
                 }
