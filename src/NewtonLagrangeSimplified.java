@@ -21,7 +21,19 @@ public class NewtonLagrangeSimplified {
 
         System.out.println("Solving: ");
         ArrayList<double[]> thing = doNewtonMethod(xAndFxValues[0],xAndFxValues[1]);
+        printDividedDifferenceTable(thing);
         System.out.println("Done");
+    }
+
+    private static void printDividedDifferenceTable(ArrayList<double[]> unFormattedTable){
+        int cols = unFormattedTable.size();
+        int rows = unFormattedTable.get(0).length;
+        for (int row = 0; row < rows; row++){
+            for (int col = 0; col < cols - row; col++){
+                System.out.printf("%2.8f ", unFormattedTable.get(col)[row]);
+            }
+            System.out.println();
+        }
     }
 
     /**
@@ -33,6 +45,8 @@ public class NewtonLagrangeSimplified {
     private static ArrayList<double[]> doNewtonMethod(double[] xVars, double[] fxVars){
         ArrayList<double[]> fLayers = new ArrayList();
         double[] workingFx = Arrays.copyOf(fxVars, fxVars.length);
+        fLayers.add(xVars);
+        fLayers.add(fxVars);
         do {
             int offset = xVars.length - workingFx.length + 1;
             double[] returnFxValues = new double[workingFx.length - 1];
