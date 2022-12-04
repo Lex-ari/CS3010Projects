@@ -149,17 +149,12 @@ public class NewtonLagrangeSimplified {
 
     private static double[] doSimplifiedMethod(ArrayList<double[]> unFormattedTable){
         // Using nested form Newton's Method to create polynomial
-        // put rightmost x f[,,,] value at the left
-        // shift double right
-        // multiply original value by x-intercept and add to double[]
-        // repeat
-
         //example
         // 3 + (x-1)(1/2 + (x-3/2)(1/3 + (x-0)(2)))
 
-        // put rightmost f[,,,] value at the right
-        // iteratively multiply
-        // double[n-1] = everything >n multiplied by the x intercept.
+        // work from right to left
+        // for each index, set it to Ai value from Newton
+        // subtract by each index above said index multiplied by the current x-intercept value.
 
         double[] coefficients = new double[unFormattedTable.get(0).length];
         for (int col = coefficients.length - 1; col >= 0; col--){
@@ -170,15 +165,7 @@ public class NewtonLagrangeSimplified {
         }
         return coefficients;
     }
-
-    private static double getAllPossibleCoefficients(double[] xIntercepts){
-
-
-
-        return 0.0;
-    }
-
-
+    
     /***
      * Asks users for the name of a file
      * @return a matrix of the coefficients if the file is found.
