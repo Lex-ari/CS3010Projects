@@ -24,6 +24,8 @@ public class NewtonLagrangeSimplified {
         printNewtonForm(thing);
         System.out.println();
         printLagrangeMethod(xAndFxValues[0], xAndFxValues[1]);
+        System.out.println();
+        System.out.println(Arrays.toString(doSimplifiedMethod(thing)));
         System.out.println("Done");
     }
 
@@ -146,7 +148,34 @@ public class NewtonLagrangeSimplified {
     }
 
     private static double[] doSimplifiedMethod(ArrayList<double[]> unFormattedTable){
-        return new double[0];
+        // Using nested form Newton's Method to create polynomial
+        // put rightmost x f[,,,] value at the left
+        // shift double right
+        // multiply original value by x-intercept and add to double[]
+        // repeat
+
+        //example
+        // 3 + (x-1)(1/2 + (x-3/2)(1/3 + (x-0)(2)))
+
+        // put rightmost f[,,,] value at the right
+        // iteratively multiply
+        // double[n-1] = everything >n multiplied by the x intercept.
+
+        double[] coefficients = new double[unFormattedTable.get(0).length];
+        for (int col = coefficients.length - 1; col >= 0; col--){
+            coefficients[col] += unFormattedTable.get(col + 1)[0];
+            for (int i = col; i < coefficients.length - 1; i++){
+                coefficients[i] -= coefficients[i + 1] * unFormattedTable.get(0)[col];
+            }
+        }
+        return coefficients;
+    }
+
+    private static double getAllPossibleCoefficients(double[] xIntercepts){
+
+
+
+        return 0.0;
     }
 
 
