@@ -2,7 +2,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 /***
@@ -23,6 +22,8 @@ public class NewtonLagrangeSimplified {
         ArrayList<double[]> thing = doNewtonMethod(xAndFxValues[0],xAndFxValues[1]);
         printDividedDifferenceTable(thing);
         printNewtonForm(thing);
+        System.out.println();
+        printLagrangeMethod(xAndFxValues[0], xAndFxValues[1]);
         System.out.println("Done");
     }
 
@@ -81,24 +82,70 @@ public class NewtonLagrangeSimplified {
         return fLayers;
     }
 
+    /**
+     * Prints out polynomail in Newton's Form given an unformatted table (ArrayList containing cols of x, f[], f[,], etc)
+     * @param unFormattedTable ArrayList containing cols of x, f[], f[,], etc
+     */
     private static void printNewtonForm(ArrayList<double[]> unFormattedTable){
+        System.out.println("Interpolating polynomial in Newton's Form:");
         for (int col = 1; col < unFormattedTable.size(); col++){
             if (col > 1){
                 System.out.print(" + ");
             }
             System.out.printf("%3.3f", unFormattedTable.get(col)[0]);
             for (int row = 0; row < col - 1; row++){
-                System.out.printf("(x-%3.3f)", unFormattedTable.get(0)[row]);
+                double xIntercept = unFormattedTable.get(0)[row];
+                if (xIntercept == 0){
+                    System.out.print("x");
+                } else {
+                    System.out.printf("(x-%3.3f)", xIntercept);
+                }
             }
         }
         System.out.println();
     }
 
-    private static double[] doLagrangeMethod(double[][] variables){
-        return new double[0];
+    /**
+     * Prints out polynomial using Lagrange's Method
+     * @param xVars double[] of x variables
+     * @param fxVars double[] of f(x) variables
+     */
+    private static void printLagrangeMethod(double[] xVars, double[] fxVars){
+        // f(xi) = p * pisum (xi - xVars)     for xi - xVari is not included.
+        // p = f(xi) / pisum(xi - xVars)     for xi - xVari is not included.
+        System.out.println("Interpolating polynomial in Lagrange's Form:");
+        double[] pVars = new double[xVars.length];
+        for (int p = 0; p < pVars.length; p++){
+            double pisum = 1;
+            for (int i = 0; i < xVars.length; i++){
+                if (i == p){
+                    continue;
+                }
+                pisum *= (xVars[p] - xVars[i]);
+            }
+            pVars[p] = fxVars[p] / pisum;
+        }
+
+        for (int i = 0; i < xVars.length; i++){
+            if (i > 0){
+                System.out.print(" + ");
+            }
+            System.out.printf("%3.3f", pVars[i]);
+            for (int j = 0; j < xVars.length; j++){
+                if (i == j){
+                    continue;
+                }
+                double xIntercept = xVars[j];
+                if (xIntercept == 0){
+                    System.out.print("x");
+                } else {
+                    System.out.printf("(x-%3.3f)", xIntercept);
+                }
+            }
+        }
     }
 
-    private static double[] doSimplifiedMethod(double[][] variables){
+    private static double[] doSimplifiedMethod(ArrayList<double[]> unFormattedTable){
         return new double[0];
     }
 
