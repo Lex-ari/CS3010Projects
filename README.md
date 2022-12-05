@@ -17,3 +17,6 @@ Programming Project 2 - JacobiIIterativeAndGauss_SeidelMethods.java https://gith
 
 
 Programming Project 3 - BisectionNewtonRhapsonSecantFalsePosition.java https://github.com/Lex-ari/CS3010Projects/blob/main/src/BisectionNewtonRhapsonSecantFalsePosition.java
+
+
+Programming Project 4 - NewtonLagrangeSimplified.java https://github.com/Lex-ari/CS3010Projects/blob/main/src/NewtonLagrangeSimplified.java
