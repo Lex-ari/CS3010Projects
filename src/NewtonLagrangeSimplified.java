@@ -19,16 +19,21 @@ public class NewtonLagrangeSimplified {
         xAndFxValues = getACMFromFile();
 
         System.out.println("Solving: ");
-        ArrayList<double[]> thing = doNewtonMethod(xAndFxValues[0],xAndFxValues[1]);
-        printDividedDifferenceTable(thing);
-        printNewtonForm(thing);
+        ArrayList<double[]> unFormattedDividedDifferenceTable = makeDividedDifferenceTable(xAndFxValues[0],xAndFxValues[1]);
+        printDividedDifferenceTable(unFormattedDividedDifferenceTable);
+        printNewtonForm(unFormattedDividedDifferenceTable);
         System.out.println();
         printLagrangeMethod(xAndFxValues[0], xAndFxValues[1]);
         System.out.println();
-        System.out.println(Arrays.toString(doSimplifiedMethod(thing)));
+        printSimplifiedMethod(unFormattedDividedDifferenceTable);
+        System.out.println();
         System.out.println("Done");
     }
 
+    /**
+     * Prints out the divided difference table
+     * @param unFormattedTable Arraylist<double[]> where 1st double[] is x vals, 2nd is f[], 3rd f[,], etc.
+     */
     private static void printDividedDifferenceTable(ArrayList<double[]> unFormattedTable){
         int cols = unFormattedTable.size();
         int rows = unFormattedTable.get(0).length;
@@ -60,12 +65,12 @@ public class NewtonLagrangeSimplified {
         return value;
     }
     /**
-     * Uses Newton's Method and returns an Array List of each column (x, f[], f[,], f[,,], etc)
+     * Makes a divided difference table by returning an Array List of each column (x, f[], f[,], f[,,], etc)
      * @param xVars initial starting x values
      * @param fxVars initial starting f(x) values
      * @return ArrayList of each column in double[] format (x, f[], f[,], f[,,], etc)
      */
-    private static ArrayList<double[]> doNewtonMethod(double[] xVars, double[] fxVars){
+    private static ArrayList<double[]> makeDividedDifferenceTable(double[] xVars, double[] fxVars){
         ArrayList<double[]> fLayers = new ArrayList();
         double[] workingFx = Arrays.copyOf(fxVars, fxVars.length);
         fLayers.add(xVars);
@@ -85,24 +90,33 @@ public class NewtonLagrangeSimplified {
     }
 
     /**
-     * Prints out polynomail in Newton's Form given an unformatted table (ArrayList containing cols of x, f[], f[,], etc)
+     * Prints out polynomial in Newton's Form given an unformatted table (ArrayList containing cols of x, f[], f[,], etc)
      * @param unFormattedTable ArrayList containing cols of x, f[], f[,], etc
      */
     private static void printNewtonForm(ArrayList<double[]> unFormattedTable){
         System.out.println("Interpolating polynomial in Newton's Form:");
+        boolean firstTermPrinted = false;
         for (int col = 1; col < unFormattedTable.size(); col++){
-            if (col > 1){
-                System.out.print(" + ");
-            }
-            System.out.printf("%3.3f", unFormattedTable.get(col)[0]);
-            for (int row = 0; row < col - 1; row++){
-                double xIntercept = unFormattedTable.get(0)[row];
-                if (xIntercept == 0){
-                    System.out.print("x");
-                } else {
-                    System.out.printf("(x-%3.3f)", xIntercept);
+            if (unFormattedTable.get(col)[0] != 0){
+                if (firstTermPrinted){
+                    System.out.print(" + ");
+                }
+                System.out.printf("%3.3f", unFormattedTable.get(col)[0]);
+                firstTermPrinted = true;
+                for (int row = 0; row < col - 1; row++){
+                    double xIntercept = unFormattedTable.get(0)[row];
+                    if (xIntercept == 0){
+                        System.out.print("x");
+                    } else {
+                        if (xIntercept < 0){
+                            System.out.printf("(x+%3.3f)", -xIntercept);
+                        } else {
+                            System.out.printf("(x-%3.3f)", xIntercept);
+                        }
+                    }
                 }
             }
+
         }
         System.out.println();
     }
@@ -128,26 +142,41 @@ public class NewtonLagrangeSimplified {
             pVars[p] = fxVars[p] / pisum;
         }
 
+        boolean firstTermPrinted = false;
         for (int i = 0; i < xVars.length; i++){
-            if (i > 0){
-                System.out.print(" + ");
-            }
-            System.out.printf("%3.3f", pVars[i]);
-            for (int j = 0; j < xVars.length; j++){
-                if (i == j){
-                    continue;
+            if (pVars[i] != 0){
+                if (firstTermPrinted){
+                    System.out.print(" + ");
                 }
-                double xIntercept = xVars[j];
-                if (xIntercept == 0){
-                    System.out.print("x");
-                } else {
-                    System.out.printf("(x-%3.3f)", xIntercept);
+                System.out.printf("%3.3f", pVars[i]);
+                firstTermPrinted = true;
+                for (int j = 0; j < xVars.length; j++){
+                    if (i == j){
+                        continue;
+                    }
+                    double xIntercept = xVars[j];
+                    if (xIntercept == 0){
+                        System.out.print("x");
+                    } else {
+                        if (xIntercept < 0){
+                            System.out.printf("(x+%3.3f)", -xIntercept);
+                        } else {
+                            System.out.printf("(x-%3.3f)", xIntercept);
+                        }
+                    }
                 }
             }
         }
+        System.out.println();
     }
 
-    private static double[] doSimplifiedMethod(ArrayList<double[]> unFormattedTable){
+    /**
+     * Prints out polynomial in simplified form using nested Newton's method.
+     * This works by multiplying and adding indexes from right ot left.
+     * @param unFormattedTable ArrayList<double[]> that corresponds to each column in divided difference table (x, f[], f[,], f[,,], etc.)
+     */
+    private static void printSimplifiedMethod(ArrayList<double[]> unFormattedTable){
+        System.out.println("Interpolating polynomial in Simplified Form:");
         // Using nested form Newton's Method to create polynomial
         //example
         // 3 + (x-1)(1/2 + (x-3/2)(1/3 + (x-0)(2)))
@@ -155,7 +184,6 @@ public class NewtonLagrangeSimplified {
         // work from right to left
         // for each index, set it to Ai value from Newton
         // subtract by each index above said index multiplied by the current x-intercept value.
-
         double[] coefficients = new double[unFormattedTable.get(0).length];
         for (int col = coefficients.length - 1; col >= 0; col--){
             coefficients[col] += unFormattedTable.get(col + 1)[0];
@@ -163,9 +191,23 @@ public class NewtonLagrangeSimplified {
                 coefficients[i] -= coefficients[i + 1] * unFormattedTable.get(0)[col];
             }
         }
-        return coefficients;
+        boolean firstTermPrinted = false;
+        for (int i = coefficients.length - 1; i >= 0; i--){
+            if (coefficients[i] != 0) { // avoid 0 * x^i print
+                if (firstTermPrinted){
+                    System.out.print(" + ");
+                }
+                System.out.printf("%3.3f", coefficients[i]);
+                firstTermPrinted = true;
+
+                if (i != 0){ // avoid x^0 print
+                    System.out.printf("x^%d", i);
+                }
+            }
+        }
+        System.out.println();
     }
-    
+
     /***
      * Asks users for the name of a file
      * @return a matrix of the coefficients if the file is found.
